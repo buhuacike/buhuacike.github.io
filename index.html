@@ -13,7 +13,7 @@
     padding: 20px;
   }
   h1 { margin-bottom: 10px; }
-  audio { margin-top: 20px; width: 80%; }
+  audio { margin-top: 10px; width: 80%; }
   button {
     margin: 10px;
     padding: 10px 20px;
@@ -30,16 +30,46 @@
   img.cover {
     max-width: 300px;
     border-radius: 10px;
-    margin-top: 20px;
+    margin-top: 10px;
     box-shadow: 0px 0px 15px rgba(255,255,255,0.3);
+  }
+  .playlist {
+    margin-top: 20px;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .playlist-item {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+  }
+  .playlist-item:hover {
+    background-color: #222;
+  }
+  .active {
+    background-color: #444;
+    color: #00ff88;
+    font-weight: bold;
+  }
+  .current-title {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #00ff88;
   }
 </style>
 </head>
 <body>
 <h1>🎵 不花刺珂のradio station</h1>
-
+<h1>每日分享</h1>
+  
 <!-- 固定封面 -->
 <img src="cover.jpg" alt="封面" class="cover">
+
+<!-- 当前曲目名 -->
+<div class="current-title" id="currentTitle">加载中...</div>
 
 <audio id="player" controls></audio>
 <div>
@@ -47,10 +77,15 @@
   <button onclick="nextSong()">⏭ 下一首</button>
 </div>
 
+<!-- 播放列表 -->
+<div class="playlist" id="playlist"></div>
+
 <script>
 let songs = [];
 let currentIndex = 0;
 const player = document.getElementById('player');
+const playlistDiv = document.getElementById('playlist');
+const currentTitleDiv = document.getElementById('currentTitle');
 
 // 读取 playlist.json
 fetch('playlist.json')
@@ -58,6 +93,7 @@ fetch('playlist.json')
   .then(data => {
     songs = data;
     if (songs.length > 0) {
+      renderPlaylist();
       loadSong(0);
     } else {
       alert("播放列表为空");
@@ -65,12 +101,32 @@ fetch('playlist.json')
   })
   .catch(() => alert("加载播放列表失败"));
 
+function renderPlaylist() {
+  playlistDiv.innerHTML = '';
+  songs.forEach((song, index) => {
+    const item = document.createElement('div');
+    item.textContent = song.title;
+    item.classList.add('playlist-item');
+    item.onclick = () => loadSong(index);
+    playlistDiv.appendChild(item);
+  });
+}
+
 function loadSong(index) {
   currentIndex = index;
   const song = songs[index];
   player.src = song.src;
   document.title = "🎵 " + song.title;
+  currentTitleDiv.textContent = song.title;
+  highlightActiveSong();
   player.play();
+}
+
+function highlightActiveSong() {
+  const items = document.querySelectorAll('.playlist-item');
+  items.forEach((item, idx) => {
+    item.classList.toggle('active', idx === currentIndex);
+  });
 }
 
 function prevSong() {
