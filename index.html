@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>黑色主题音乐电台</title>
+<style>
+  body {
+    background-color: #000; /* 黑色背景 */
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { margin-bottom: 10px; }
+  audio { margin-top: 20px; width: 80%; }
+  button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  button:hover {
+    background-color: #555;
+  }
+  img.cover {
+    max-width: 300px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0px 0px 15px rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+<h1>🎵 我的音乐电台</h1>
+
+<!-- 固定封面 -->
+<img src="cover.jpg" alt="封面" class="cover">
+
+<audio id="player" controls></audio>
+<div>
+  <button onclick="prevSong()">⏮ 上一首</button>
+  <button onclick="nextSong()">⏭ 下一首</button>
+</div>
+
+<script>
+let songs = [];
+let currentIndex = 0;
+const player = document.getElementById('player');
+
+// 读取 playlist.json
+fetch('playlist.json')
+  .then(res => res.json())
+  .then(data => {
+    songs = data;
+    if (songs.length > 0) {
+      loadSong(0);
+    } else {
+      alert("播放列表为空");
+    }
+  })
+  .catch(() => alert("加载播放列表失败"));
+
+function loadSong(index) {
+  currentIndex = index;
+  const song = songs[index];
+  player.src = song.src;
+  document.title = "🎵 " + song.title;
+  player.play();
+}
+
+function prevSong() {
+  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+  loadSong(currentIndex);
+}
+
+function nextSong() {
+  currentIndex = (currentIndex + 1) % songs.length;
+  loadSong(currentIndex);
+}
+
+player.addEventListener('ended', nextSong);
+</script>
+</body>
+</html>
